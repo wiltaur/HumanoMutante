@@ -1,0 +1,85 @@
+<div class="container my-5">
+  <div class="text-center mb-4">
+    <h1 class="display-5 fw-bold text-primary">Detector de Mutantes ADN</h1>
+    <p class="text-muted">Prueba de base nitrogenada</p>
+  </div>
+
+  <div class="card shadow-sm mb-4" *ngIf="!isGridCreated">
+    <div class="card-header bg-dark text-white">
+      <h5 class="mb-0">Paso 1: Definir tamaño de la matriz (N x N)</h5>
+    </div>
+    <div class="card-body">
+      <div class="row align-items-center g-3">
+        <div class="col-auto">
+          <label for="gridSize" class="col-form-label fw-semibold">Tamaño de la tabla:</label>
+        </div>
+        <div class="col-md-2">
+          <input type="number" id="gridSize" class="form-control" [(ngModel)]="gridSize" min="4" max="12">
+        </div>
+        <div class="col-auto">
+          <button class="btn btn-primary" (click)="createGrid()">Generar Tabla</button>
+        </div>
+      </div>
+      <small class="text-secondary d-block mt-2">Mínimo sugerido: 4x4. Máximo sugerido: 12x12 por legibilidad.</small>
+    </div>
+  </div>
+
+  <div class="card shadow" *ngIf="isGridCreated">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 text-secondary">Matriz Activa: <span class="text-dark">{{gridSize}} x {{gridSize}}</span></h5>
+      <button class="btn btn-sm btn-outline-danger" (click)="restart()">Cambiar tamaño</button>
+    </div>
+    
+    <div class="card-body text-center">
+      <p class="text-muted mb-3">
+        <i class="bi bi-info-circle"></i> 
+        <strong>Paso 2:</strong> Haz click sobre cada celda para alternar entre las bases nitrogenadas (<strong>A, T, C, G</strong>).
+      </p>
+
+      <!-- Renderizado Dinámico de la Tabla ADN -->
+      <div class="d-flex justify-content-center overflow-auto mb-4">
+        <div class="d-inline-block border p-2 bg-light rounded shadow-inner">
+          <div *ngFor="let row of dnaGrid; let rIdx = index" class="d-flex justify-content-center">
+            <div *ngFor="let cell of row; let cIdx = index" class="p-1">
+              <button 
+                type="button" 
+                class="btn cell-btn d-flex align-items-center justify-content-center fw-bold transition-all"
+                [ngClass]="{
+                  'btn-success border-success text-white shadow': isCellMutant(rIdx, cIdx),
+                  'btn-outline-secondary': !isCellMutant(rIdx, cIdx) && !cell,
+                  'btn-light border-dark text-dark text-opacity-75': !isCellMutant(rIdx, cIdx) && cell
+                }"
+                (click)="toggleBase(rIdx, cIdx)">
+                {{ cell || '-' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <button 
+          class="btn btn-lg btn-success px-5 py-3 fw-bold shadow-sm" 
+          [disabled]="!isGridComplete()"
+          (click)="verifyDna()">
+          Analizar ADN
+        </button>
+      </div>
+
+      <!-- Alertas de Resultados -->
+      <div class="mt-4 row justify-content-center" *ngIf="isMutantResult !== null">
+        <div class="col-md-6">
+          <div *ngIf="isMutantResult" class="alert alert-danger border-2 shadow-sm py-3" role="alert">
+            <h4 class="alert-heading fw-bold">🧬 ¡Es Mutante!</h4>
+            <p class="mb-0">Se han detectado múltiples secuencias de 4 bases nitrogenadas iguales consecutivas.</p>
+          </div>
+          <div *ngIf="!isMutantResult" class="alert alert-info border-2 shadow-sm py-3" role="alert">
+            <h4 class="alert-heading fw-bold">🚶 Humano Convencional</h4>
+            <p class="mb-0">No cumple con las secuencias necesarias de ADN para catalogarse como mutante.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
